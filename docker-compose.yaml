@@ -29,9 +29,18 @@ services:
         - DEV=true
     volumes:
       - ./app:/app
-    # command: >
-    #   sh -c "python manage.py makemigrations &&
-    #     python manage.py migrate &&
-    #     python manage.py runserver 0.0.0.0:8000"
+    command: >
+      sh -c "celery -A app worker -l INFO"
+    depends_on:
+      - redis
+
+  celery2:
+    container_name: celery2
+    build:
+      context: standalonecelery
+    volumes:
+      - ./standalonecelery:/app
+    command: >
+      sh -c "celery -A celerytask worker -l INFO"
     depends_on:
       - redis
