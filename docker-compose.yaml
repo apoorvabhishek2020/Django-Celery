@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7.0.12-alpine3.18
+
+  app:
+    container_name: django
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py makemigrations &&
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - redis
+
+  celery:
+    container_name: celery
+    build:
+      context: .
+      args:
+        - DEV=true
+    volumes:
+      - ./app:/app
+    # command: >
+    #   sh -c "python manage.py makemigrations &&
+    #     python manage.py migrate &&
+    #     python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - redis
